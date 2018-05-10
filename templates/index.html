@@ -1,0 +1,25 @@
+$def with (form, results)
+
+	<form name="main" method="post" class="row col-md-12"> 
+		$if not form.valid: <p class="error">Try again:</p>
+		$:form.render()
+		<input type="submit" value="submit"/>    
+	</form>
+
+
+	$if form.valid and results:
+		<section class="col-md-12 row">
+			<table id="results-table">
+				<tbody>
+					$for x,y in results.iteritems():
+					<tr class="col-md-12">
+						<td class="col-md-3">$x</td>
+						<td class="col-md-6">
+							<p data-name="custom-text" contenteditable="true">$y</p>
+						</td>
+					</tr>
+				</tbody>
+				<input class="save" type="button" value="save"/>
+			</table>	
+
+		</section>

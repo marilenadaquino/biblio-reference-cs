@@ -1,0 +1,5 @@
+td, th {vertical-align: top; padding: 2em;}
+p[contenteditable="true"] {
+  color: grey;
+  cursor: pointer;
+}
