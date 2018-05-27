@@ -1,0 +1,20 @@
+$def with (results, content)
+	
+	$if results:
+		<section class="col-md-12">
+			<p>$content</p>
+			<table id="results-table">
+				<tbody>
+					$for x,y in results:
+					<tr class="col-md-12">
+						<td class="col-md-6">$x</td>
+						<td class="col-md-6">
+							<p name="customRef">$y</p>
+							<button type="button" name="accept" class="accept"><i class="fas fa-check"></i></button>
+							<button type="button" name="modify" class="modify"><i class="far fa-edit"></i></button>
+						</td>
+					</tr>
+				</tbody>
+				<input type="button" value="save" class="save">
+			</table>	
+		</section>
