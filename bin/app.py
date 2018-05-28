@@ -35,7 +35,7 @@ myform = form.Form(
 	# 	form.regexp(r'^http[s]?:\/\/orcid.org\/(\d{4})-(\d{4})-(\d{4})-(\d{3}[0-9X])$', 'Must be a ORCID')), #regex suggested by pkp (ojs)
     form.Textbox("DOI", form.notnull,
         form.regexp(r'^10.\d{4,9}\/[-._;()/:a-zA-Z0-9]+$', 'Must be a DOI')), #regex suggested by crossref
-    form.Textarea('references', form.notnull , value='paste your references here', post='paste your references here - each paragraph corresponds to a single reference entry.'),
+    form.Textarea('references', form.notnull , post='<em>paste your references here - each paragraph corresponds to a single reference entry.</em>'),
     form.Dropdown('style', ['Chicago', 'MLA'], form.notnull),
     form.Button("form_action", value='search' , description='search', type="submit")
     ) 

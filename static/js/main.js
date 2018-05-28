@@ -1,8 +1,44 @@
-$(document).ready(function () {
+jQuery(document).ready(function () {
+  
 
-  // save edits and update the table
+  // style form
+  $('button[value="add"]').empty();
+  $('button[value="add"]').prepend('<i class="fas fa-plus"></i>');
+
+  $('button[value="search"]').empty();
+  $('button[value="search"]').prepend('<i class="fas fa-search"></i>');
+
+  // autoresize textarea
+  $('textarea').each(function () {
+    this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+  }).on('input', function () {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+  });
+
+  // change background according to URL
+  var loc = window.location.href; // returns the full URL
+  if(/results/.test(loc)) {
+    $('.background').addClass('no-bck');
+    $('body').addClass('no-bck');
+    $('.background').css('position','relative');
+    $('.background').css('height','25%');
+    $('header').css('position','fixed');
+    $('header').css('background-color','white');
+    $('header').css('width','100%');
+    $('h1').css('height','3.5em');
+    $('header h1 span').css('color','#696969');
+  }
+
+  // style references text area
+  // $('#references').attr('rows', '10');
+  $('#references').attr('cols', '50');
+
+  // save edits and update the table for export
   $(".save").click(function() {
 
+    
+    $(this).attr('value','done!');
     // export 2nd column of the table
     var table = TableExport(document.getElementById("results-table"), {
       headings: false,                       
@@ -24,9 +60,6 @@ $(document).ready(function () {
     table.getExportData();
   });
 
-  // style references text area
-  $('#references').attr('rows', '20');
-  $('#references').attr('cols', '120');
 
   // DOES NOT WORK highlight references in the textarea for double check
   // $("textarea").markRegExp('(.+?)(\n|$)+');
@@ -40,10 +73,10 @@ $(document).ready(function () {
     ////////////////////
     // placeholder to change the call
     ////////////////////
-    var request = new XMLHttpRequest();
-    request.open('GET', 'http://search.crossref.org/dois?q=hallo', true);
-    console.log(request.response);
-    request.send();
+    // var request = new XMLHttpRequest();
+    // request.open('GET', 'http://search.crossref.org/dois?q=hallo', true);
+    // console.log(request.response);
+    // request.send();
 
     $("button.modify").click(function() {
       $(this).prevAll('p:first').attr("contenteditable", 'true');
@@ -59,13 +92,13 @@ $(document).ready(function () {
         ////////////////////
         // placeholder to change the call
         ////////////////////
-        var request = new XMLHttpRequest();
-        request.open('GET', 'http://search.crossref.org/dois?q=hallo', true);
-        console.log(request.response);
-        request.send(); 
+        // var request = new XMLHttpRequest();
+        // request.open('GET', 'http://search.crossref.org/dois?q=hallo', true);
+        // console.log(request.response);
+        // request.send(); 
       });
   });
-    
+
   });
 
   $("button.modify").click(function() {
@@ -82,10 +115,10 @@ $(document).ready(function () {
         ////////////////////
         // placeholder to change the call
         ////////////////////
-        var request = new XMLHttpRequest();
-        request.open('GET', 'http://search.crossref.org/dois?q=hallo', true);
-        console.log(request.response);
-        request.send(); 
+        // var request = new XMLHttpRequest();
+        // request.open('GET', 'http://search.crossref.org/dois?q=hallo', true);
+        // console.log(request.response);
+        // request.send(); 
       });
   });
 
