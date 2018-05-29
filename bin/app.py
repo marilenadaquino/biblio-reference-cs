@@ -56,12 +56,12 @@ class index:
         s = web.input(form_action='search')
         ts = time.time() # TODO change it
 
-        if (i.form_action == 'add') and not authorform.validates():
+        if (i.form_action == 'add') and authorform.validates():
             authorform.add_input(web.form.Textbox('author '+str(len(authorform.inputs)) )) 
             return render.index(authorForm=authorform, form=f, results=None)
-        elif not authorform.validates():
+        elif (i.form_action == 'add') and not authorform.validates():
             return render.index(authorForm=authorform, form=f, results=None)
-        elif not f.validates():
+        elif (s.form_action == 'search') and (not authorform.validates() or not f.validates()):
             return render.index(authorForm=authorform, form=f, results=None)
         elif (s.form_action == 'search') and f.validates() and authorform.validates():
             #####################
