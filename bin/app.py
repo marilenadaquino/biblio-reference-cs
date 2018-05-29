@@ -56,11 +56,14 @@ class index:
         s = web.input(form_action='search')
         ts = time.time() # TODO change it
 
-        if i.form_action == 'add' and authorform.validates():
+        if (i.form_action == 'add') and not authorform.validates():
             authorform.add_input(web.form.Textbox('author '+str(len(authorform.inputs)) )) 
             return render.index(authorForm=authorform, form=f, results=None)
-
-        elif s.form_action == 'search' and authorform.validates():
+        elif not authorform.validates():
+            return render.index(authorForm=authorform, form=f, results=None)
+        elif not f.validates():
+            return render.index(authorForm=authorform, form=f, results=None)
+        elif (s.form_action == 'search') and f.validates() and authorform.validates():
             #####################
             # placeholder for the first call to the API: send metadata of the citing entity: NB multiple authors
             #####################
