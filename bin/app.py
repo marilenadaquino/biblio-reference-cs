@@ -1,12 +1,14 @@
-import web , re , urlparse, requests , string , urllib , time , datetime
+import web , re , requests , string , urllib , time , datetime
+import urllib.parse
 from web import form
+
+web.config.debug = False
 
 # routing
 urls = (
 	'/','index',
     '/results', 'results'
 )
-
 
 # templates
 render = web.template.render('templates/', base="layout", globals={'re':re})
@@ -19,11 +21,10 @@ class DinamycForm(form.Form):
         self.inputs = tuple(list_inputs)
 
 authorForm = DinamycForm(
-    form.Textbox('author', form.notnull , description='author'),
+    form.Textbox('author', form.notnull , form.regexp(r'((.*),(.*))', 'Must be: Lastname, Name'), description='author', post='<a class="tip" href="#" data-toggle="tooltip" data-placement="right" title="e.g. Berners-Lee, Tim"><i class="fas fa-info-circle"></i></a>'),
     form.Button("form_action", value='add' , description='add', type="submit")
     )
 
-# TODO what are the parameters for the citing entity?
 myform = form.Form( 
     form.Textbox('title', form.notnull),
     form.Textbox('journal'),
@@ -45,8 +46,6 @@ authorform = authorForm()
 
 class index: 
     def GET(self): 
-        f = myform()
-        authorform = authorForm()
         return render.index(authorform, f, results=None)
 
 
@@ -54,43 +53,68 @@ class index:
         data = web.input()
         i = web.input(form_action='add')
         s = web.input(form_action='search')
-        ts = time.time() # TODO change it
+        ts = time.time()
 
         if (i.form_action == 'add') and authorform.validates():
-            authorform.add_input(web.form.Textbox('author '+str(len(authorform.inputs)) )) 
+            authorform.add_input(web.form.Textbox('author',form.notnull , form.regexp(r'((.*),(.*))', 'Must be in the form: Lastname, Name') )) 
             return render.index(authorForm=authorform, form=f, results=None)
         elif (i.form_action == 'add') and not authorform.validates():
             return render.index(authorForm=authorform, form=f, results=None)
         elif (s.form_action == 'search') and (not authorform.validates() or not f.validates()):
             return render.index(authorForm=authorform, form=f, results=None)
         elif (s.form_action == 'search') and f.validates() and authorform.validates():
-            #####################
-            # placeholder for the first call to the API: send metadata of the citing entity: NB multiple authors
-            #####################
-            raise web.seeother('/results?references='+urllib.quote_plus((web.input().references).encode('ascii', 'ignore'))+'?time='+str(ts))
-                              
+            citingEntity = {} # build json
+            dataAu = web.input(author=[])
+            authors = dataAu.author 
+            citingEntity['author'] = authors
+            citingEntity['title'] = data.title
+            if data.journal != '':
+                citingEntity['journal'] = data.journal
+            if data.volume != '':
+                citingEntity['volume'] = data.volume
+            if data.issue != '':
+                citingEntity['issue'] = data.issue
+            citingEntity['year'] = data.year
+            citingEntity['publisher'] = data.publisher
+            citingEntity['doi'] = data.DOI
+            
+            ##################### first call to BCite API: send metadata about the citing entity and get back an ID
+            # /citing/{timestamp}/{json}
+            # request = requests.get('http://localhost:8000/citing/'+str(ts)+'/'+urllib.parse.quote(citingEntity)) 
+            # response = request.json()
+            # idCitingRef = response[0]['id']
+            # raise web.seeother('/results?idRef='+idCitingRef+'&references='+urllib.parse.quote((web.input().references))+'&style='+web.input().style+'&time='+str(ts))
+            ##################### remove the following line
+            raise web.seeother('/results?references='+urllib.parse.quote((web.input().references))+'&style='+web.input().style+'&time='+str(ts))
 
 class results:
     def GET(self):
-        s = web.input()
-        referencesDecoded = urllib.unquote(web.input().references).decode('utf8')
-        splitReferencesText = [x for x in string.split(referencesDecoded, '\n') if x != '\r'] # extract references from 'references' 
-        results = {}         
+        s = str(web.ctx.query)
+        referencesDecoded = urllib.parse.unquote(web.input().references)
+        timeStamp = s.split("time=",1)[1]
+        splitReferencesText = [x for x in referencesDecoded.split('\n') if x != '\r'] # extract references from 'references' 
+        results = []        
         for referenceText in splitReferencesText:
+            ##################### second call to the API: send references and get back the matched references
+            # /reference/{timestamp}/{citing}/{style}/{reference}
+            # request = requests.get('http://localhost:8000/reference/'+str(ts)+'/'+web.input().idRef+'/'+web.input().style+'/'+urllib.parse.quote(referenceText) ) 
+            # response = request.json()
+            # referenceMatch = {}
+            # referenceMatch['submitted'] = referenceText
+            # referenceMatch['match'] = request[0]['reference']
+            # referenceMatch['id'] = request[0]['id']
+            # results.append(referenceMatch)
+            ##################### remove the following lines
             encodedReference = '+'.join(word for word in re.compile('\w+').findall(referenceText))
-            #####################
-            # placeholder for the second call to the API: change the following line
-            #####################
-            request = requests.get('https://api.crossref.org/works?query='+encodedReference+'?sample=1&select=DOI,title')
-            results[referenceText] = request.text
-        sortedResults = sorted(results.items(), key=lambda x: x[0])
-        return render.results(results=sortedResults, content='Placeholder for the citing entity')
-    
-    # def POST(self):
-    #     data = web.input(customRef=[])
-    #     customReferences = data.customRef
-        
-
+            request = requests.get('http://api.crossref.org/works?query='+encodedReference+'?sample=1&select=DOI,title')
+            referenceMatch = {}
+            referenceMatch['submitted'] = referenceText
+            referenceMatch['match'] = request.text 
+            referenceMatch['id'] = '123'
+            results.append(referenceMatch)
+        #sortedResults = sorted(results.items(), key=lambda x: x[0])
+        print(results)
+        return render.results(results=results, content='Placeholder for the citing entity')
 
 if __name__ == "__main__":
 	app = web.application(urls, globals())
